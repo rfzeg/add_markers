@@ -9,8 +9,8 @@
 #include <ros/package.h>
 // marker visualization message
 #include <visualization_msgs/Marker.h>
-// stamped point message
-#include <geometry_msgs/PointStamped.h>
+// stamped pose message
+#include <geometry_msgs/Pose.h>
 // tf2 matrix
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -29,9 +29,9 @@ void operator >> ( const YAML::Node& node, T& i )
 }
 
 /*
-   Build Rviz_markers from yaml file
+   Parse Rviz markers from yaml file
 */
-bool buildMarkersFromFile(std::vector<geometry_msgs::PointStamped> &rviz_markers) // pass array of PointStamped messages by reference
+bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pass array of Pose messages by reference
 {
   // clear waypoints vector
   rviz_markers.clear();
@@ -50,7 +50,7 @@ bool buildMarkersFromFile(std::vector<geometry_msgs::PointStamped> &rviz_markers
     std::ifstream ifs( markers_path_filename.c_str(), std::ifstream::in ); //ifs is the name of the object created
     if ( !ifs.good() )
     {
-      ROS_FATAL( "buildMarkersFromFile() could not open file" );// if it cannot open the file check path, package name
+      ROS_FATAL( "parseMarkersFromFile() could not open file" );// if it cannot open the file check path, package name
       return false; 
     }
     YAML::Node yaml_node;
@@ -65,122 +65,129 @@ bool buildMarkersFromFile(std::vector<geometry_msgs::PointStamped> &rviz_markers
       // loop over all the markers
       for (int i = 0; i < wp_node->size(); i++)
       {
-        // declare 'point' which is used to keep each marker's parameters/coordinates (double)
-        geometry_msgs::PointStamped point;
+        // declare 'current_point' which is used to keep each marker's pose
+        geometry_msgs::Pose current_point;
+        double yaw;
 
-        (*wp_node)[i]["point"]["x"] >> point.point.x;
-        (*wp_node)[i]["point"]["y"] >> point.point.y;
-        (*wp_node)[i]["point"]["th"] >> point.point.z; // 'th' from here on is 'z'
-        rviz_markers.push_back(point);  // 
+        (*wp_node)[i]["point"]["x"] >> current_point.position.x;
+        (*wp_node)[i]["point"]["y"] >> current_point.position.y;
+        
+        (*wp_node)[i]["point"]["th"] >> yaw;
+        
+        /// convert degrees to quaternion
+        // convert degrees to radians // TO-DO: make sure angle is normalized
+        yaw = yaw * M_PI / 180.;
+        // declare quaternion
+        tf2::Quaternion q;
+        // convert to quaternion
+        q.setRPY( 0., 0., yaw );
+        current_point.orientation.x = q.x();
+        current_point.orientation.y = q.y();
+        current_point.orientation.z = q.z();
+        current_point.orientation.w = q.w();
+        
+        rviz_markers.push_back(current_point);
       }
     }
     else
     {
-      ROS_FATAL( "buildMarkersFromFile() failed, wp_node == NULL" ); 
+      ROS_FATAL( "parseMarkersFromFile() failed, wp_node == NULL" ); 
       return false;
     }
   }
   catch (YAML::ParserException &e)
   {
-    ROS_FATAL( "buildMarkersFromFile() failed, YAML::ParserException" );
+    ROS_FATAL( "parseMarkersFromFile() failed, YAML::ParserException" );
     return false;
   }
   catch (YAML::RepresentationException &e)
   {
-    ROS_FATAL( "buildMarkersFromFile() failed, YAML::RepresentationException" );
+    ROS_FATAL( "parseMarkersFromFile() failed, YAML::RepresentationException" );
     return false;
   }
   return true;
 }
 
-
 /*
-   Run markers
+    Build one marker visualization message
 */
-void run(visualization_msgs::Marker &marker_drop, std::vector<geometry_msgs::PointStamped> rviz_markers, uint32_t shape, int index)
+void buildVisMsg(visualization_msgs::Marker &marker_message, std::vector<geometry_msgs::Pose> rviz_markers, uint32_t shape, int index)
 {
   // Set the frame ID and optionally the timestamp. See the TF tutorials for information on these.
-  marker_drop.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
+  marker_message.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
 
   // Set the namespace and id for this marker.  This serves to create a unique ID
   // Any marker sent with the same namespace and id will overwrite the old one
-  marker_drop.ns = "basic_shapes";  // namespace
-  marker_drop.id = 0;
+  marker_message.ns = "basic_shapes";  // define a namespace
+  marker_message.id = 0;
 
   // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-  marker_drop.type = shape; // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
+  marker_message.type = shape; // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
 
   // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
   // add really means "create or modify".
-  marker_drop.action = visualization_msgs::Marker::ADD;
+  marker_message.action = visualization_msgs::Marker::ADD;
 
   // set the pose of the marker
-  marker_drop.pose.position.x = rviz_markers[index].point.x;
-  marker_drop.pose.position.y = rviz_markers[index].point.y;
-  marker_drop.pose.position.z = 0.5;
-
-  // convert the degrees to quaternion
-  double yaw = rviz_markers[index].point.z * M_PI / 180.;
-  tf2::Quaternion q;
-  q.setRPY( 0., 0., yaw );
-  marker_drop.pose.orientation.x = q.x();
-  marker_drop.pose.orientation.y = q.y();
-  marker_drop.pose.orientation.z = q.z();
-  marker_drop.pose.orientation.w = q.w();
+  marker_message.pose.position.x = rviz_markers[index].position.x;
+  marker_message.pose.position.y = rviz_markers[index].position.y;
+  marker_message.pose.position.z = 0.5;
+  marker_message.pose.orientation.x = rviz_markers[index].orientation.x;
+  marker_message.pose.orientation.y = rviz_markers[index].orientation.y;
+  marker_message.pose.orientation.z = rviz_markers[index].orientation.z;
+  marker_message.pose.orientation.w = rviz_markers[index].orientation.w;
 
   // Set the scale of the marker -- 1x1x1 here means 1m on a side
-  marker_drop.scale.x = 0.5;
-  marker_drop.scale.y = 0.5;
-  marker_drop.scale.z = 0.5;
+  marker_message.scale.x = 0.5;
+  marker_message.scale.y = 0.5;
+  marker_message.scale.z = 0.5;
   // Set the color -- be sure to set alpha to something non-zero!
-  marker_drop.color.r = 0.0f;
-  marker_drop.color.g = 1.0f;
-  marker_drop.color.b = 0.0f;
-  marker_drop.color.a = 1.0;
-  marker_drop.lifetime = ros::Duration();
-}  // end run()
+  marker_message.color.r = 0.0f;
+  marker_message.color.g = 1.0f;
+  marker_message.color.b = 0.0f;
+  marker_message.color.a = 1.0;
+  marker_message.lifetime = ros::Duration();
+}  // end buildVisMsg()
 
 
 int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers"); // create node
   ros::NodeHandle n; // start node
-  ros::Rate r(0.2); // makes a best effort at maintaining a particular rate for a loop, here 0.2 Hz
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-
-  visualization_msgs::Marker marker_drop; // declare a visualization marker
-
-  // declare an array of PointStamped messages to keep track of the pose of the markers
-  std::vector<geometry_msgs::PointStamped> rviz_markers; 
-
+  // declare a marker visualization message object
+  visualization_msgs::Marker marker_message;
+  // declare an array of Pose messages to keep track of the pose of the markers
+  std::vector<geometry_msgs::Pose> rviz_markers; 
   // integer that keeps track of the shape, initial shape type is set to be 'CUBE'
   // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
   uint32_t shape = visualization_msgs::Marker::CUBE;
 
-  bool built = buildMarkersFromFile(rviz_markers); 
+  bool built = parseMarkersFromFile(rviz_markers); 
+  
   if ( !built )
   {
     ROS_FATAL( "Building markers from a file failed" );
     return 0;
   }
-
-  while (ros::ok())
-  {
-    // publishes Markers
-    for ( int j = 0; j < rviz_markers.size(); j++ )
-    {
-      // funtion call to display Rviz markers, traversing the array of markers
-      run(marker_drop, rviz_markers, shape, j);
-
-      // Publish the marker
-      while (marker_pub.getNumSubscribers() < 1)
+  // check the number of subscribers that are currently connected to this Publisher
+  while (marker_pub.getNumSubscribers() < 1)
       {
-        ROS_WARN_ONCE("Please create a subscriber to the marker (e.g. add marker in Rviz)");
+        ROS_WARN_ONCE("Please create a subscriber to the marker (e.g. add in Rviz)");
         sleep(1);
       } // end while
-      
-      marker_pub.publish(marker_drop);
-      r.sleep(); // keeps track of how much time since last r.sleep() was executed and sleep for the correct amount of time to hit the ros::Rate mark
+
+  ros::Rate rate(2); // in Hz, makes a best effort at maintaining a particular rate for a loop, here 2 Hz
+  while (ros::ok())
+  {
+    // publishes Markers, traversing the array of markers
+    for ( int j = 0; j < rviz_markers.size(); j++ )
+    {
+      // funtion call to build a Rviz marker message
+      buildVisMsg(marker_message, rviz_markers, shape, j);
+      // Publish the marker     
+      marker_pub.publish(marker_message);
+      rate.sleep(); // keeps track of how much time since last rate.sleep() was executed and sleep for the correct amount of time to hit the rate() mark
     }
   }
 }
