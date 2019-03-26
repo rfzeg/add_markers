@@ -131,9 +131,7 @@ void buildVisMsg(visualization_msgs::Marker &marker_message, std::vector<geometr
   // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
   marker_message.type = shape; // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
 
-  // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
-  // add really means "create or modify".
-  marker_message.action = visualization_msgs::Marker::ADD;
+  // Optional: Set the marker action.  Options are ADD, DELETE, and DELETEALL
 
   // set the pose of the marker
   marker_message.pose.position.x = rviz_markers[index].position.x;
@@ -207,10 +205,12 @@ int main( int argc, char** argv )
   visualization_msgs::Marker marker_message;
   // declare an array of Pose messages to keep track of the pose of the markers
   std::vector<geometry_msgs::Pose> rviz_markers; 
+  // declare waypoint element
+  geometry_msgs::Pose wp_element;
   // integer that keeps track of the shape, initial shape type is set to be 'CUBE'
   // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
   uint32_t shape = visualization_msgs::Marker::CUBE;
-
+  uint8_t task = 0;
   bool built = parseMarkersFromFile(rviz_markers); 
   
   if ( !built )
@@ -226,24 +226,67 @@ int main( int argc, char** argv )
       } // end while
 
   ros::Rate rate(2); // in Hz, makes a best effort at maintaining a particular rate for a loop, here 2 Hz
-  while (ros::ok())
+  while(ros::ok())
   {
-    //check if waypoint is reached, traversing the array of markers
-    for ( int j = 0; j < rviz_markers.size(); j++ )
+  switch (task)
     {
-      geometry_msgs::Pose wp_element = rviz_markers[j];
-      // funtion call to check if Waypoint is reached   
-      bool reached = isWaypointReached(global_pose, wp_element); 
-      if ( !reached )
+    case 0:
+      ROS_INFO_ONCE("At start location");
+      // set action field to specify what to do with the marker
+      //marker_message.action = visualization_msgs::Marker::ADD;
+      // funtion call to build Rviz marker message
+      buildVisMsg(marker_message, rviz_markers, shape, 0);
+      // publish marker
+      marker_pub.publish(marker_message);
+      task = 1;
+      break;
+    
+    case 1:
+      ROS_INFO_ONCE("Moving to pick up place");
+      // check if the pick up place is reached
+      wp_element = rviz_markers[0];
+      if (isWaypointReached(global_pose, wp_element))
       {
-        ROS_INFO("Waypoint [%d] not reached", j+1);
+        task = 2;
       }
-      else
+      break;
+    
+    case 2:
+      ROS_INFO_ONCE("At pick up place");
+      // Wait 5 seconds to simulate a pickup
+      ros::Duration(5, 0).sleep(); // constructs a ros::Duration object, then call its sleep() method
+      // set action field to specify what to do with the marker
+      marker_message.action = visualization_msgs::Marker::DELETE;
+      // funtion call to build Rviz marker message
+      buildVisMsg(marker_message, rviz_markers, shape, 0);
+      // publish marker
+      marker_pub.publish(marker_message);
+      // move to next task
+      task = 3;
+      break;
+    
+    case 3:
+      ROS_INFO_ONCE("Moving to drop off zone");
+      // check if the drop off zone is reached
+      wp_element = rviz_markers[1];
+      if (isWaypointReached(global_pose, wp_element))
       {
-        ROS_INFO("Waypoint [%d] reached !!!", j+1); 
+        task = 4;
       }
+      break;
+    
+    case 4:
+      ROS_INFO_ONCE("At drop off zone");
+      // set action field to specify what to do with the marker
+      marker_message.action = visualization_msgs::Marker::ADD;
+      // funtion call to build Rviz marker message
+      buildVisMsg(marker_message, rviz_markers, shape, 1);
+      // publish marker
+      marker_pub.publish(marker_message);
+      break;
     }
     ros::spinOnce(); // will call all the callbacks waiting to be called at that point in time
     rate.sleep(); // keeps track of how much time since last rate.sleep() was executed and sleep for the correct amount of time to hit the rate() mark
   }
+  return 0;
 }
