@@ -9,8 +9,10 @@
 #include <ros/package.h>
 // marker visualization message
 #include <visualization_msgs/Marker.h>
-// stamped pose message
+// pose message
 #include <geometry_msgs/Pose.h>
+// stamped pose message
+#include <geometry_msgs/PoseStamped.h>
 // tf2 matrix
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -19,6 +21,8 @@
 #include <yaml-cpp/yaml.h>
 // stream library to both read and write from/to files
 #include <fstream>
+// imports the Odometry message type from nav_msgs required to subscribe to Odometry incoming messages
+#include <nav_msgs/Odometry.h>
 
 // The >> operator disappeared in yaml-cpp 0.5, so this function is
 // added to provide support for code written under the yaml-cpp 0.3 API.
@@ -27,6 +31,9 @@ void operator >> ( const YAML::Node& node, T& i )
 {
   i = node.as<T>();
 }
+
+// initialize global variable for current global pose
+geometry_msgs::PoseStamped global_pose;
 
 /*
    Parse Rviz markers from yaml file
@@ -149,12 +156,53 @@ void buildVisMsg(visualization_msgs::Marker &marker_message, std::vector<geometr
   marker_message.lifetime = ros::Duration();
 }  // end buildVisMsg()
 
+/*
+   Get current pose from odometry topic
+*/
+void odomListener(const nav_msgs::Odometry::ConstPtr& msg)
+{
+    // Populate current global pose header
+    global_pose.header.stamp = ros::Time::now();
+    // Populate current global pose position data
+    global_pose.pose.position.x = msg->pose.pose.position.x;
+    global_pose.pose.position.y = msg->pose.pose.position.y; 
+    global_pose.pose.position.z = msg->pose.pose.position.z;
+    // Populate current global pose orientation data
+    global_pose.pose.orientation = msg->pose.pose.orientation;
+}
+
+/*
+   Calculate euclidean distance between two points
+*/
+double getWaypointPositionDistance(const geometry_msgs::PoseStamped& global_pose, double goal_x, double goal_y) {
+    return hypot(goal_x - global_pose.pose.position.x, goal_y - global_pose.pose.position.y);
+  }
+
+/*
+   Check if current pose is equal to waypoint position considering a tolerance
+*/
+bool isWaypointReached(const geometry_msgs::PoseStamped& global_pose, const geometry_msgs::Pose& wp_pose)
+{
+    double xy_goal_tolerance = 0.25; // set tolerance as required
+    double goal_x = wp_pose.position.x; // goal_pose.pose.position.x;
+    double goal_y = wp_pose.position.y; // goal_pose.pose.position.y;
+    //  check to see if we've reached the waypoint position
+    if(getWaypointPositionDistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
+      return true;
+     }
+     else 
+     {
+       return false;
+     }
+}
 
 int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers"); // create node
   ros::NodeHandle n; // start node
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  // Subscriber reads messages from the "odom" topic, which are of the type Odometry, and calls the 'chatterCallback' functions when it receives a message
+  ros::Subscriber sub = n.subscribe("/odom", 1000, odomListener);
   // declare a marker visualization message object
   visualization_msgs::Marker marker_message;
   // declare an array of Pose messages to keep track of the pose of the markers
@@ -180,14 +228,22 @@ int main( int argc, char** argv )
   ros::Rate rate(2); // in Hz, makes a best effort at maintaining a particular rate for a loop, here 2 Hz
   while (ros::ok())
   {
-    // publishes Markers, traversing the array of markers
+    //check if waypoint is reached, traversing the array of markers
     for ( int j = 0; j < rviz_markers.size(); j++ )
     {
-      // funtion call to build a Rviz marker message
-      buildVisMsg(marker_message, rviz_markers, shape, j);
-      // Publish the marker     
-      marker_pub.publish(marker_message);
-      rate.sleep(); // keeps track of how much time since last rate.sleep() was executed and sleep for the correct amount of time to hit the rate() mark
+      geometry_msgs::Pose wp_element = rviz_markers[j];
+      // funtion call to check if Waypoint is reached   
+      bool reached = isWaypointReached(global_pose, wp_element); 
+      if ( !reached )
+      {
+        ROS_INFO("Waypoint [%d] not reached", j+1);
+      }
+      else
+      {
+        ROS_INFO("Waypoint [%d] reached !!!", j+1); 
+      }
     }
+    ros::spinOnce(); // will call all the callbacks waiting to be called at that point in time
+    rate.sleep(); // keeps track of how much time since last rate.sleep() was executed and sleep for the correct amount of time to hit the rate() mark
   }
 }
