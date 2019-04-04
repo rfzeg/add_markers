@@ -1,9 +1,9 @@
 markers:
   - point:
-      x: 3.0
-      y: 2.0
-      th: 0 # in degree
+      x: 1.0
+      y: 3.0
+      th: 0 # in degrees
   - point:
-      x: -3.0
-      y: 2.0
-      th: 0 # in degree
+      x: 3.5
+      y: 2.5
+      th: 90 # in degrees
