@@ -9,9 +9,9 @@ ROS node that reads in Rviz marker positions from a YAML file and publishes them
  
 ### Directories :
 + **src/** : (required) contains source code, **add_markers.cpp**
-+ **config/** : (required) contains YAML file that stores the position and orientation of Rviz markers
-+ **rviz/** : (optional) contains Rviz configuration that includes a subscriber to the Rviz marker topic
-
++ **config/** : (required) contains YAML file that stores the position and orientation of markers
++ **rviz/** : (optional) contains Rviz configuration file ready for displaying visual markers
++ **launch/** : (optional) contains launch file for the executable file of this package
 
 ## YAML file structure
 
@@ -43,7 +43,7 @@ The YAML file can be adjusted by adding or deleting markers, changing they order
 
 - Clone this repository into a ROS catkin workspace
 - Build and source the workspace
-- To execute this package: `rosrun add_markers add_markers`
+- To launch this package including Rviz: `roslaunch add_markers add_markers.launch`
 
 
 ## Usage example in combination with a waypoint generator node using Gazebo as simulation:
@@ -73,3 +73,4 @@ The YAML file can be adjusted by adding or deleting markers, changing they order
 
   `./home_service.sh`
   
+  Or run each node one by one manually in separated terminal instances
