@@ -122,7 +122,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+#  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -154,6 +154,7 @@ include_directories(
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
+#   yaml-cpp
 # )
 
 #############
@@ -205,6 +206,6 @@ include_directories(
 # catkin_add_nosetests(test)
 
 # add the executable
-add_executable(add_markers src/add_markers.cpp)
+add_executable(add_markers src/add_markers.cpp src/rviz_markers_pub.cpp)
 # link the executable to libraries
 target_link_libraries(add_markers ${catkin_LIBRARIES} yaml-cpp)

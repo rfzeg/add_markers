@@ -23,6 +23,8 @@
 #include <fstream>
 // imports the Odometry message type from nav_msgs required to subscribe to Odometry incoming messages
 #include <nav_msgs/Odometry.h>
+// incorporate file that defines the class "RvizMarkersPub"
+#include "include/rviz_markers_pub.h"
 
 // The >> operator disappeared in yaml-cpp 0.5, so this function is
 // added to provide support for code written under the yaml-cpp 0.3 API.
@@ -35,9 +37,7 @@ void operator >> ( const YAML::Node& node, T& i )
 // initialize global variable for current global pose
 geometry_msgs::PoseStamped global_pose;
 
-/*
-   Parse Rviz markers from yaml file
-*/
+/* Parse Rviz markers from yaml file */
 bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pass array of Pose messages by reference
 {
   // clear waypoints vector
@@ -115,48 +115,7 @@ bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pas
   return true;
 }
 
-/*
-    Build one marker visualization message
-*/
-void buildVisMsg(visualization_msgs::Marker &marker_message, std::vector<geometry_msgs::Pose> rviz_markers, uint32_t shape, int index)
-{
-  // Set the frame ID and optionally the timestamp. See the TF tutorials for information on these.
-  marker_message.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
-
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  // Any marker sent with the same namespace and id will overwrite the old one
-  marker_message.ns = "basic_shapes";  // define a namespace
-  marker_message.id = 0;
-
-  // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-  marker_message.type = shape; // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
-
-  // Optional: Set the marker action.  Options are ADD, DELETE, and DELETEALL
-
-  // set the pose of the marker
-  marker_message.pose.position.x = rviz_markers[index].position.x;
-  marker_message.pose.position.y = rviz_markers[index].position.y;
-  marker_message.pose.position.z = 0.5;
-  marker_message.pose.orientation.x = rviz_markers[index].orientation.x;
-  marker_message.pose.orientation.y = rviz_markers[index].orientation.y;
-  marker_message.pose.orientation.z = rviz_markers[index].orientation.z;
-  marker_message.pose.orientation.w = rviz_markers[index].orientation.w;
-
-  // Set the scale of the marker -- 1x1x1 here means 1m on a side
-  marker_message.scale.x = 0.5;
-  marker_message.scale.y = 0.5;
-  marker_message.scale.z = 0.5;
-  // Set the color -- be sure to set alpha to something non-zero!
-  marker_message.color.r = 0.0f;
-  marker_message.color.g = 1.0f;
-  marker_message.color.b = 0.0f;
-  marker_message.color.a = 1.0;
-  marker_message.lifetime = ros::Duration();
-}  // end buildVisMsg()
-
-/*
-   Get current pose from odometry topic
-*/
+/* Get current pose from odometry topic */
 void odomListener(const nav_msgs::Odometry::ConstPtr& msg)
 {
     // Populate current global pose header
@@ -169,23 +128,19 @@ void odomListener(const nav_msgs::Odometry::ConstPtr& msg)
     global_pose.pose.orientation = msg->pose.pose.orientation;
 }
 
-/*
-   Calculate euclidean distance between two points
-*/
-double getWaypointPositionDistance(const geometry_msgs::PoseStamped& global_pose, double goal_x, double goal_y) {
+/* Calculate euclidean distance between two points */
+double pose2XYdistance(const geometry_msgs::PoseStamped& global_pose, double goal_x, double goal_y) {
     return hypot(goal_x - global_pose.pose.position.x, goal_y - global_pose.pose.position.y);
   }
 
-/*
-   Check if current pose is equal to waypoint position considering a tolerance
-*/
+/* Check if current pose is equal to waypoint position considering a tolerance */
 bool isWaypointReached(const geometry_msgs::PoseStamped& global_pose, const geometry_msgs::Pose& wp_pose)
 {
     double xy_goal_tolerance = 0.25; // set tolerance as required
     double goal_x = wp_pose.position.x; // goal_pose.pose.position.x;
     double goal_y = wp_pose.position.y; // goal_pose.pose.position.y;
     //  check to see if we've reached the waypoint position
-    if(getWaypointPositionDistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
+    if(pose2XYdistance(global_pose, goal_x, goal_y) <= xy_goal_tolerance) {
       return true;
      }
      else 
@@ -198,18 +153,18 @@ int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers"); // create node
   ros::NodeHandle n; // start node
-  ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-  // Subscriber reads messages from the "odom" topic, which are of the type Odometry, and calls the 'chatterCallback' functions when it receives a message
   ros::Subscriber sub = n.subscribe("/odom", 1000, odomListener);
-  // declare a marker visualization message object
-  visualization_msgs::Marker marker_message;
+  // init RvizMarkersPub object
+  RvizMarkersPub rvizMarkersPub(&n);
   // declare an array of Pose messages to keep track of the pose of the markers
   std::vector<geometry_msgs::Pose> rviz_markers; 
-  // declare waypoint element
-  geometry_msgs::Pose wp_element;
+  // declare waypoint element that holds one specific pose
+  geometry_msgs::Pose waypoint_element;
   // integer that keeps track of the shape, initial shape type is set to be 'CUBE'
   // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
   uint32_t shape = visualization_msgs::Marker::CUBE;
+
+  // variable used to cycle trough different tasks
   uint8_t task = 0;
   bool built = parseMarkersFromFile(rviz_markers); 
   
@@ -218,34 +173,27 @@ int main( int argc, char** argv )
     ROS_FATAL( "Building markers from a file failed" );
     return 0;
   }
-  // check the number of subscribers that are currently connected to this Publisher
-  while (marker_pub.getNumSubscribers() < 1)
-      {
-        ROS_WARN_ONCE("Please create a subscriber to the marker (e.g. add in Rviz)");
-        sleep(1);
-      } // end while
 
-  ros::Rate rate(2); // in Hz, makes a best effort at maintaining a particular rate for a loop, here 2 Hz
+  // make best effort at maintaining a particular rate for a loop
+  ros::Rate rate(0.5);// in Hz
   while(ros::ok())
   {
   switch (task)
     {
     case 0:
       ROS_INFO_ONCE("At start location");
-      // set action field to specify what to do with the marker
-      //marker_message.action = visualization_msgs::Marker::ADD;
       // funtion call to build Rviz marker message
-      buildVisMsg(marker_message, rviz_markers, shape, 0);
+      rvizMarkersPub.buildVisMsg(rviz_markers, 0, "ADD");
       // publish marker
-      marker_pub.publish(marker_message);
+      rvizMarkersPub.pub();
       task = 1;
       break;
     
     case 1:
       ROS_INFO_ONCE("Moving to pick up place");
       // check if the pick up place is reached
-      wp_element = rviz_markers[0];
-      if (isWaypointReached(global_pose, wp_element))
+      waypoint_element = rviz_markers[0];
+      if (isWaypointReached(global_pose, waypoint_element))
       {
         task = 2;
       }
@@ -254,13 +202,12 @@ int main( int argc, char** argv )
     case 2:
       ROS_INFO_ONCE("At pick up place");
       // Wait 5 seconds to simulate a pickup
-      ros::Duration(5, 0).sleep(); // constructs a ros::Duration object, then call its sleep() method
-      // set action field to specify what to do with the marker
-      marker_message.action = visualization_msgs::Marker::DELETE;
+      // construct a ros::Duration object, then call its sleep() method
+      ros::Duration(5, 0).sleep();
       // funtion call to build Rviz marker message
-      buildVisMsg(marker_message, rviz_markers, shape, 0);
+      rvizMarkersPub.buildVisMsg(rviz_markers, 0, "DELETE");
       // publish marker
-      marker_pub.publish(marker_message);
+      rvizMarkersPub.pub();
       // move to next task
       task = 3;
       break;
@@ -268,21 +215,20 @@ int main( int argc, char** argv )
     case 3:
       ROS_INFO_ONCE("Moving to drop off zone");
       // check if the drop off zone is reached
-      wp_element = rviz_markers[1];
-      if (isWaypointReached(global_pose, wp_element))
+      waypoint_element = rviz_markers[1];
+      if (isWaypointReached(global_pose, waypoint_element))
       {
+        // move to next task
         task = 4;
       }
       break;
     
     case 4:
       ROS_INFO_ONCE("At drop off zone");
-      // set action field to specify what to do with the marker
-      marker_message.action = visualization_msgs::Marker::ADD;
       // funtion call to build Rviz marker message
-      buildVisMsg(marker_message, rviz_markers, shape, 1);
+      rvizMarkersPub.buildVisMsg(rviz_markers, 1, "ADD");
       // publish marker
-      marker_pub.publish(marker_message);
+      rvizMarkersPub.pub();
       break;
     }
     ros::spinOnce(); // will call all the callbacks waiting to be called at that point in time
