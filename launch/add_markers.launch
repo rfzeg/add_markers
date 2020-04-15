@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
+<!-- Launches Rviz configured for viewing visual markers -->
+<!-- Starts add_markers node -->
+
 <launch>
    
-  <node pkg="add_markers" type="add_markers" name="add_markers_node" output="screen" />
+  <!-- By default, start RViz from this launch file -->
+  <arg name="use_rviz" default="true" />
+  <!-- Set config file -->
+  <arg name="rvizconfig" default="$(find add_markers)/rviz/add_markers.rviz"/>
+  <node if="$(arg use_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
 
-  <!-- By default, do not start RViz from this launch file -->
-  <arg name="rviz" default="false" />
-  <!-- Launch Rviz configured for viewing visual markers -->
-  <arg name="rvizconfig" default="$(find add_markers)/rviz/add_markers.rviz"/> <!-- Set config file --> 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" if="$(arg use_rviz)" />
+  <node pkg="add_markers" type="add_markers" name="add_markers_node" output="screen" />
 
 </launch>
