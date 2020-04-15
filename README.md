@@ -10,12 +10,13 @@ uses that information to decide whether or not to to publish a marker to Rviz.
 ## Dependencies
 - yaml-cpp
 
-This YAML parser and emitter is installed as a rosdep system dependency. This is, it gets installed when rosdep is installed and configured (which is one of ROS installation steps in the official ROS wiki page):  
+After installing ROS, the yaml-cpp library gets installed as a rosdep system dependency. Rosdep gets installed (when following the steps in the official ROS wiki page) by the instruction below:  
 `$ rosdep install --from-paths -i -y src`  
-When adding yaml-cpp to a new node, make sure the CMakeLists.txt file contains the following instruction for the compiler to capable of successfully linking against the yaml-cpp library:  
-`target_link_libraries(${PROJECT_NAME} yaml-cpp)`  
-The package.xml manifest has to be edited as follows:  
-`<build_depend>common_rosdeps</build_depend>`  
+> To use yaml-cpp with a new ROS package make sure the CMakeLists.txt file contains the following instruction so the compiler can link
+> against the yaml-cpp library:  
+> `target_link_libraries(${PROJECT_NAME} yaml-cpp)`  
+> Also the package.xml manifest has to be edited to add the following:  
+> `<build_depend>common_rosdeps</build_depend>`  
 
 ## Repository architecture 
 ### Source code files :
@@ -65,13 +66,12 @@ Edit the YAML file to add/delete markers, change the sequence or add/remove comm
 To view the markers, run rviz:  
 `$ rosrun rviz rviz`  
 
-Set the Fixed Frame field to "/map" or the frame the marker was set under `marker_message_.header.frame_id`.  
+If required, set the Fixed Frame field to "/map" or the frame the marker was set under `marker_message_.header.frame_id`.  
 Then add a Markers display. Verify that the topic specified is the same as the one being published.
 
 ## RvizMarkersPub Class Interface
-The kind of marker being published (arrow, sphere, cube, etc.. ) can be set using the `setMarkerType()` method. The available types are enumerated in the [visualization_msgs/Marker](http://docs.ros.org/melodic/api/visualization_msgs/html/msg/Marker.html) message.  
-The `pub()` method in the 'RvizMarkersPub' class can be used to send messages to other ROS nodes.  
-Finally, `buildVisMsg()` provides a mean to populate a new Visualization Message with data.  
+The `setMarkerType()` method in the 'RvizMarkersPub' class populates a new Visualization Message with data and sends that message to other ROS nodes. 
+Aditionally the `setMarkerType()` provides a mean to set the kind of marker being published (arrow, sphere, cube, etc.. ). The available types are enumerated in the [visualization_msgs/Marker](http://docs.ros.org/melodic/api/visualization_msgs/html/msg/Marker.html) message. 
 
 ---
 

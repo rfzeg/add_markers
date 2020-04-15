@@ -4,19 +4,23 @@
 RvizMarkersPub::RvizMarkersPub(ros::NodeHandle* nodehandle):nh_(*nodehandle)
 { // constructor
     initializePublishers();
-    // test/wait to make sure a subscriber is currently connected to this Publisher
-    while (marker_pub.getNumSubscribers() < 1)
-      {
-        ROS_WARN_ONCE("Please create a subscriber to the marker (e.g. add in Rviz)");
-        sleep(1);
-      }
 }
 
 // member helper function to set up publishers
 void RvizMarkersPub::initializePublishers()
 {
-    ROS_INFO("Initializing Publishers");
-    marker_pub = nh_.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  ROS_INFO("Initializing Publishers");
+  marker_pub = nh_.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+
+  // test/wait to make sure a subscriber is currently connected to this Publisher
+  // because it requires time to create a connection between nodes, the connection
+  // is confirmed in order to avoid having to enter a loop to publish a marker
+  // or risk that te message is sent but not received
+  while (marker_pub.getNumSubscribers() < 1)
+  {
+    ROS_WARN_ONCE("Waiting until Rviz Marker publisher and subscriber have established a connection (e.g. add display in Rviz)");
+    sleep(1);
+  }
 }
 
 void RvizMarkersPub::setMarkerType(uint32_t new_shape){
@@ -25,56 +29,54 @@ void RvizMarkersPub::setMarkerType(uint32_t new_shape){
   shape_ = new_shape;
 }
 
-/* Build one marker visualization message */
-void RvizMarkersPub::buildVisMsg(std::vector<geometry_msgs::Pose> rviz_markers, int index, std::string action)
+/* Builds one marker visualization message and publishes it */
+void RvizMarkersPub::newVisMsg(std::vector<geometry_msgs::Pose> parsed_poses, int index, std::string action, int counter)
 {
+  visualization_msgs::Marker marker;
   // Set the frame ID and optionally the timestamp. See the TF tutorials for information on these.
-  marker_message_.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
+  marker.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
 
   // Set the namespace and id for this marker.  This serves to create a unique ID
   // Any marker sent with the same namespace and id will overwrite the old one
-  marker_message_.ns = "basic_shapes";  // define a namespace
-  marker_message_.id = 0;
+  marker.ns = "basic_shapes";  // define a namespace
+  marker.id = counter;
 
   // Set the marker type
-  marker_message_.type = shape_;
+  marker.type = shape_;
 
   // set action field to specify what to do with the marker, options are ADD, DELETE, and DELETEALL
   if((action.compare("ADD")) == 0) {
-      marker_message_.action = visualization_msgs::Marker::ADD;
+      marker.action = visualization_msgs::Marker::ADD;
   }
   else if ((action.compare("DELETE")) == 0) {
-      marker_message_.action = visualization_msgs::Marker::DELETE;
+      marker.action = visualization_msgs::Marker::DELETE;
   }
   else if ((action.compare("DELETEALL")) == 0) {
-      marker_message_.action = visualization_msgs::Marker::DELETEALL;
+      marker.action = visualization_msgs::Marker::DELETEALL;
   }
   else {
       ROS_ERROR("No (or wrong) action field set to specify how the marker behaves (options are ADD, DELETE, DELETEALL)");
   }
 
   // set the pose of the marker
-  marker_message_.pose.position.x = rviz_markers[index].position.x;
-  marker_message_.pose.position.y = rviz_markers[index].position.y;
-  marker_message_.pose.position.z = 0.5;
-  marker_message_.pose.orientation.x = rviz_markers[index].orientation.x;
-  marker_message_.pose.orientation.y = rviz_markers[index].orientation.y;
-  marker_message_.pose.orientation.z = rviz_markers[index].orientation.z;
-  marker_message_.pose.orientation.w = rviz_markers[index].orientation.w;
+  marker.pose.position.x = parsed_poses[index].position.x;
+  marker.pose.position.y = parsed_poses[index].position.y;
+  marker.pose.position.z = 0.5;
+  marker.pose.orientation.x = parsed_poses[index].orientation.x;
+  marker.pose.orientation.y = parsed_poses[index].orientation.y;
+  marker.pose.orientation.z = parsed_poses[index].orientation.z;
+  marker.pose.orientation.w = parsed_poses[index].orientation.w;
 
   // Set the scale of the marker -- 1x1x1 here means 1m on a side
-  marker_message_.scale.x = 0.5;
-  marker_message_.scale.y = 0.5;
-  marker_message_.scale.z = 0.5;
+  marker.scale.x = 0.5;
+  marker.scale.y = 0.5;
+  marker.scale.z = 0.5;
   // Set the color -- be sure to set alpha to something non-zero!
-  marker_message_.color.r = 0.0f;
-  marker_message_.color.g = 1.0f;
-  marker_message_.color.b = 0.0f;
-  marker_message_.color.a = 1.0;
-  marker_message_.lifetime = ros::Duration();
-}  // end buildVisMsg()
+  marker.color.r = 0.0f;
+  marker.color.g = 1.0f;
+  marker.color.b = 0.0f;
+  marker.color.a = 1.0;
+  marker.lifetime = ros::Duration();
 
-// publish marker
-void RvizMarkersPub::pub(){
-  marker_pub.publish(marker_message_);
+  marker_pub.publish(marker);
 }

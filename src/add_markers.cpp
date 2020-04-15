@@ -38,10 +38,10 @@ void operator >> ( const YAML::Node& node, T& i )
 geometry_msgs::PoseStamped global_pose;
 
 /* Parse Rviz markers from yaml file */
-bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pass array of Pose messages by reference
+bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &parsed_marker_poses) // pass array of Pose messages by reference
 {
-  // clear waypoints vector
-  rviz_markers.clear();
+  // clear vector
+  parsed_marker_poses.clear();
 
   // declare string for input file name including the path inside the package
   std::string markers_filename = "config/markers.yaml";
@@ -53,15 +53,15 @@ bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pas
 
   try
   {
-    // determine if file opens
-    std::ifstream ifs( markers_path_filename.c_str(), std::ifstream::in ); //ifs is the name of the object created
+    // determine if file opens, ifs is the name of the object created
+    std::ifstream ifs( markers_path_filename.c_str(), std::ifstream::in );
     if ( !ifs.good() )
     {
       ROS_FATAL( "parseMarkersFromFile() could not open file" );// if it cannot open the file check path, package name
       return false; 
     }
     YAML::Node yaml_node;
-    // load file
+    // load a YAML string
     yaml_node = YAML::Load(ifs);
     // read data of new yaml file
     const YAML::Node &wp_node_tmp = yaml_node[ "markers" ];
@@ -69,7 +69,7 @@ bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pas
 
     if (wp_node != NULL)
     {
-      // loop over all the markers
+      // loop over all the sub-nodes
       for (int i = 0; i < wp_node->size(); i++)
       {
         // declare 'current_point' which is used to keep each marker's pose
@@ -81,19 +81,19 @@ bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &rviz_markers) // pas
         
         (*wp_node)[i]["point"]["th"] >> yaw;
         
-        /// convert degrees to quaternion
-        // convert degrees to radians // TO-DO: make sure angle is normalized
+        /* convert degrees to quaternion */
+        // 1. convert degrees to radians // TO-DO: make sure angle is normalized
         yaw = yaw * M_PI / 180.;
         // declare quaternion
         tf2::Quaternion q;
-        // convert to quaternion
+        // 2. convert to quaternion
         q.setRPY( 0., 0., yaw );
         current_point.orientation.x = q.x();
         current_point.orientation.y = q.y();
         current_point.orientation.z = q.z();
         current_point.orientation.w = q.w();
         
-        rviz_markers.push_back(current_point);
+        parsed_marker_poses.push_back(current_point);
       }
     }
     else
@@ -151,13 +151,13 @@ bool isWaypointReached(const geometry_msgs::PoseStamped& global_pose, const geom
 
 int main( int argc, char** argv )
 {
-  ros::init(argc, argv, "add_markers"); // create node
+  ros::init(argc, argv, "add_markers"); // create ROS node
   ros::NodeHandle n; // start node
   ros::Subscriber sub = n.subscribe("/odom", 1000, odomListener);
   // init RvizMarkersPub object
   RvizMarkersPub rvizMarkersPub(&n);
-  // declare an array of Pose messages to keep track of the pose of the markers
-  std::vector<geometry_msgs::Pose> rviz_markers; 
+  // declare an array of Pose messages to store the parsed data from the selected YAML file
+  std::vector<geometry_msgs::Pose> parsed_marker_poses;
   // declare waypoint element that holds one specific pose
   geometry_msgs::Pose waypoint_element;
   // integer that keeps track of the shape, initial shape type is set to be 'CUBE'
@@ -166,7 +166,7 @@ int main( int argc, char** argv )
 
   // variable used to cycle trough different tasks
   uint8_t task = 0;
-  bool built = parseMarkersFromFile(rviz_markers); 
+  bool built = parseMarkersFromFile(parsed_marker_poses);
   
   if ( !built )
   {
@@ -182,17 +182,15 @@ int main( int argc, char** argv )
     {
     case 0:
       ROS_INFO_ONCE("At start location");
-      // funtion call to build Rviz marker message
-      rvizMarkersPub.buildVisMsg(rviz_markers, 0, "ADD");
-      // publish marker
-      rvizMarkersPub.pub();
+      // funtion call to build a Rviz marker message and publish it
+      rvizMarkersPub.newVisMsg(parsed_marker_poses, 0, "ADD", 0);
       task = 1;
       break;
     
     case 1:
       ROS_INFO_ONCE("Moving to pick up place");
       // check if the pick up place is reached
-      waypoint_element = rviz_markers[0];
+      waypoint_element = parsed_marker_poses[0];
       if (isWaypointReached(global_pose, waypoint_element))
       {
         task = 2;
@@ -204,10 +202,8 @@ int main( int argc, char** argv )
       // Wait 5 seconds to simulate a pickup
       // construct a ros::Duration object, then call its sleep() method
       ros::Duration(5, 0).sleep();
-      // funtion call to build Rviz marker message
-      rvizMarkersPub.buildVisMsg(rviz_markers, 0, "DELETE");
-      // publish marker
-      rvizMarkersPub.pub();
+      // funtion call to build a Rviz marker message and publish it
+      rvizMarkersPub.newVisMsg(parsed_marker_poses, 0, "DELETE", 0);
       // move to next task
       task = 3;
       break;
@@ -215,7 +211,7 @@ int main( int argc, char** argv )
     case 3:
       ROS_INFO_ONCE("Moving to drop off zone");
       // check if the drop off zone is reached
-      waypoint_element = rviz_markers[1];
+      waypoint_element = parsed_marker_poses[1];
       if (isWaypointReached(global_pose, waypoint_element))
       {
         // move to next task
@@ -225,14 +221,14 @@ int main( int argc, char** argv )
     
     case 4:
       ROS_INFO_ONCE("At drop off zone");
-      // funtion call to build Rviz marker message
-      rvizMarkersPub.buildVisMsg(rviz_markers, 1, "ADD");
-      // publish marker
-      rvizMarkersPub.pub();
+      // funtion call to build a Rviz marker message and publish it
+      rvizMarkersPub.newVisMsg(parsed_marker_poses, 1, "ADD", 0);
       break;
     }
-    ros::spinOnce(); // will call all the callbacks waiting to be called at that point in time
-    rate.sleep(); // keeps track of how much time since last rate.sleep() was executed and sleep for the correct amount of time to hit the rate() mark
+    // will call all the callbacks waiting to be called at that point in time
+    ros::spinOnce();
+    // tracks time since last rate.sleep() and stops the right amount of time to match the rate()
+    rate.sleep();
   }
   return 0;
 }
