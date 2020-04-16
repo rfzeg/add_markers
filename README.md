@@ -69,9 +69,11 @@ To view the markers, run rviz:
 If required, set the Fixed Frame field to "/map" or the frame the marker was set under `marker_message_.header.frame_id`.  
 Then add a Markers display. Verify that the topic specified is the same as the one being published.
 
-## RvizMarkersPub Class Interface
+## Class Interfaces
 The `setMarkerType()` method in the 'RvizMarkersPub' class populates a new Visualization Message with data and sends that message to other ROS nodes. 
-Aditionally the `setMarkerType()` provides a mean to set the kind of marker being published (arrow, sphere, cube, etc.. ). The available types are enumerated in the [visualization_msgs/Marker](http://docs.ros.org/melodic/api/visualization_msgs/html/msg/Marker.html) message. 
+Aditionally the `setMarkerType()` provides a mean to set the kind of marker being published (arrow, sphere, cube, etc.. ). The available types are enumerated in the [visualization_msgs/Marker](http://docs.ros.org/melodic/api/visualization_msgs/html/msg/Marker.html) message.  
+
+The `parseMarkersFromFile()` in the 'MarkerParser' class reads in the markers from a file and populates the vector of Pose messages it received as argument.
 
 ---
 

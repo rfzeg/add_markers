@@ -5,115 +5,23 @@
 
 // ros
 #include <ros/ros.h>
-// ros package to access package directory
-#include <ros/package.h>
+
 // marker visualization message
 #include <visualization_msgs/Marker.h>
 // pose message
 #include <geometry_msgs/Pose.h>
 // stamped pose message
 #include <geometry_msgs/PoseStamped.h>
-// tf2 matrix
-#include <tf2/LinearMath/Matrix3x3.h>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Transform.h>
-// yaml file handling
-#include <yaml-cpp/yaml.h>
-// stream library to both read and write from/to files
-#include <fstream>
+
 // imports the Odometry message type from nav_msgs required to subscribe to Odometry incoming messages
 #include <nav_msgs/Odometry.h>
 // incorporate file that defines the class "RvizMarkersPub"
 #include "include/rviz_markers_pub.h"
-
-// The >> operator disappeared in yaml-cpp 0.5, so this function is
-// added to provide support for code written under the yaml-cpp 0.3 API.
-template<typename T>
-void operator >> ( const YAML::Node& node, T& i )
-{
-  i = node.as<T>();
-}
+// incorporate file that defines the class "MarkerParser"
+#include "include/marker_parser.h"
 
 // initialize global variable for current global pose
 geometry_msgs::PoseStamped global_pose;
-
-/* Parse Rviz markers from yaml file */
-bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &parsed_marker_poses) // pass array of Pose messages by reference
-{
-  // clear vector
-  parsed_marker_poses.clear();
-
-  // declare string for input file name including the path inside the package
-  std::string markers_filename = "config/markers.yaml";
-  std::string markers_path_filename;
-    
-  // get the package path
-  std::string pkg_path= ros::package::getPath( "add_markers" ); // change accordingly
-  markers_path_filename = pkg_path + "/" + markers_filename;
-
-  try
-  {
-    // determine if file opens, ifs is the name of the object created
-    std::ifstream ifs( markers_path_filename.c_str(), std::ifstream::in );
-    if ( !ifs.good() )
-    {
-      ROS_FATAL( "parseMarkersFromFile() could not open file" );// if it cannot open the file check path, package name
-      return false; 
-    }
-    YAML::Node yaml_node;
-    // load a YAML string
-    yaml_node = YAML::Load(ifs);
-    // read data of new yaml file
-    const YAML::Node &wp_node_tmp = yaml_node[ "markers" ];
-    const YAML::Node *wp_node = wp_node_tmp ? &wp_node_tmp : NULL;
-
-    if (wp_node != NULL)
-    {
-      // loop over all the sub-nodes
-      for (int i = 0; i < wp_node->size(); i++)
-      {
-        // declare 'current_point' which is used to keep each marker's pose
-        geometry_msgs::Pose current_point;
-        double yaw;
-
-        (*wp_node)[i]["point"]["x"] >> current_point.position.x;
-        (*wp_node)[i]["point"]["y"] >> current_point.position.y;
-        
-        (*wp_node)[i]["point"]["th"] >> yaw;
-        
-        /* convert degrees to quaternion */
-        // 1. convert degrees to radians // TO-DO: make sure angle is normalized
-        yaw = yaw * M_PI / 180.;
-        // declare quaternion
-        tf2::Quaternion q;
-        // 2. convert to quaternion
-        q.setRPY( 0., 0., yaw );
-        current_point.orientation.x = q.x();
-        current_point.orientation.y = q.y();
-        current_point.orientation.z = q.z();
-        current_point.orientation.w = q.w();
-        
-        parsed_marker_poses.push_back(current_point);
-      }
-    }
-    else
-    {
-      ROS_FATAL( "parseMarkersFromFile() failed, wp_node == NULL" ); 
-      return false;
-    }
-  }
-  catch (YAML::ParserException &e)
-  {
-    ROS_FATAL( "parseMarkersFromFile() failed, YAML::ParserException" );
-    return false;
-  }
-  catch (YAML::RepresentationException &e)
-  {
-    ROS_FATAL( "parseMarkersFromFile() failed, YAML::RepresentationException" );
-    return false;
-  }
-  return true;
-}
 
 /* Get current pose from odometry topic */
 void odomListener(const nav_msgs::Odometry::ConstPtr& msg)
@@ -163,10 +71,13 @@ int main( int argc, char** argv )
   // integer that keeps track of the shape, initial shape type is set to be 'CUBE'
   // e.g. ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
   uint32_t shape = visualization_msgs::Marker::CUBE;
-
   // variable used to cycle trough different tasks
   uint8_t task = 0;
-  bool built = parseMarkersFromFile(parsed_marker_poses);
+
+  // init parser object
+  MarkerParser markerParser;
+
+  bool built = markerParser.parseMarkersFromFile(parsed_marker_poses);
   
   if ( !built )
   {
