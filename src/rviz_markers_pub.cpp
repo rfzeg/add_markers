@@ -30,55 +30,50 @@ void RvizMarkersPub::setMarkerType(uint32_t new_shape){
 }
 
 /* Builds one marker visualization message and publishes it */
-void RvizMarkersPub::newVisMsg(std::vector<geometry_msgs::Pose> parsed_poses, int index, std::string action, int counter)
+void RvizMarkersPub::newVisMsg(visualization_msgs::Marker parsed_marker, std::string action)
 {
-  visualization_msgs::Marker marker;
   // Set the frame ID and optionally the timestamp. See the TF tutorials for information on these.
-  marker.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
+  parsed_marker.header.frame_id = "/map"; // reference frame relative to which the marker's pose is interpreted
 
   // Set the namespace and id for this marker.  This serves to create a unique ID
   // Any marker sent with the same namespace and id will overwrite the old one
-  marker.ns = "basic_shapes";  // define a namespace
-  marker.id = counter;
+  parsed_marker.ns = "basic_shapes";  // define a namespace
 
   // Set the marker type
-  marker.type = shape_;
+  parsed_marker.type = shape_;
 
   // set action field to specify what to do with the marker, options are ADD, DELETE, and DELETEALL
   if((action.compare("ADD")) == 0) {
-      marker.action = visualization_msgs::Marker::ADD;
+      parsed_marker.action = visualization_msgs::Marker::ADD;
   }
   else if ((action.compare("DELETE")) == 0) {
-      marker.action = visualization_msgs::Marker::DELETE;
+      parsed_marker.action = visualization_msgs::Marker::DELETE;
   }
   else if ((action.compare("DELETEALL")) == 0) {
-      marker.action = visualization_msgs::Marker::DELETEALL;
+      parsed_marker.action = visualization_msgs::Marker::DELETEALL;
   }
   else {
       ROS_ERROR("No (or wrong) action field set to specify how the marker behaves (options are ADD, DELETE, DELETEALL)");
   }
 
-  // set the pose of the marker
-  marker.pose.position.x = parsed_poses[index].position.x;
-  marker.pose.position.y = parsed_poses[index].position.y;
-  marker.pose.position.z = 0.5;
-  marker.pose.orientation.x = parsed_poses[index].orientation.x;
-  marker.pose.orientation.y = parsed_poses[index].orientation.y;
-  marker.pose.orientation.z = parsed_poses[index].orientation.z;
-  marker.pose.orientation.w = parsed_poses[index].orientation.w;
+  // set the orientation of the marker (identity quaternion, no rotation)
+  parsed_marker.pose.orientation.x = 0;
+  parsed_marker.pose.orientation.y = 0;
+  parsed_marker.pose.orientation.z = 0;
+  parsed_marker.pose.orientation.w = 1;
 
   // Set the scale of the marker -- 1x1x1 here means 1m on a side
-  marker.scale.x = 0.5;
-  marker.scale.y = 0.5;
-  marker.scale.z = 0.5;
+  parsed_marker.scale.x = 0.5;
+  parsed_marker.scale.y = 0.5;
+  parsed_marker.scale.z = 0.5;
   // Set the color -- be sure to set alpha to something non-zero!
-  marker.color.r = 0.0f;
-  marker.color.g = 1.0f;
-  marker.color.b = 0.0f;
-  marker.color.a = 1.0;
-  marker.lifetime = ros::Duration();
+  parsed_marker.color.r = 0.0f;
+  parsed_marker.color.g = 1.0f;
+  parsed_marker.color.b = 0.0f;
+  parsed_marker.color.a = 1.0;
+  parsed_marker.lifetime = ros::Duration();
 
-  marker_pub.publish(marker);
+  marker_pub.publish(parsed_marker);
 }
 
 /* Builds visualization message containing one line and publishes it */

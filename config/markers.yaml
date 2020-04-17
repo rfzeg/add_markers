@@ -1,8 +1,10 @@
-markers:
+marker:
   - point:
       x: 1.0
       y: 3.0
       th: 0 # in degrees
+---
+marker:
   - point:
       x: 3.5
       y: 2.5

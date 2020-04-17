@@ -34,11 +34,12 @@ After installing ROS, the yaml-cpp library gets installed as a rosdep system dep
 The data structure to which a yaml file should adhere in order to be compatible with this node is the following:
 
 ```yml
-markers:
+marker:
   - point:
       x: 1.0
       y: 3.0
       th: 0 # in degrees
+---
   - point:
       x: 3.5
       y: 2.5
@@ -47,11 +48,13 @@ markers:
 
 As showed above the a marker's definition file has the following structure:  
 
-- `markers` (required): root object that identifies the YAML file as containing Rviz markers data
-- `point` (required): block key that groups the definition of each marker's position and orientation in the map  
-- `x`, `y` and `th` (required): key-value pairs that contain the coordinates (x,y) and orientation (th), in degrees, of each marker
+- `marker` (required): root object that identifies one YAML node containing data of one Rviz marker
+- `point` (required): block key that groups the definition of the marker's position and orientation in the map  
+- `x`, `y` and `th` (required): key-value pairs that contain the coordinates (x,y) and orientation (th), in degrees, of the marker
 
-Each YAML document can only have one root object. All `point` elements begin with a dash (-) and must be prefixed with the same amount of spaces, in the example above two spaces are used, the number of spaces can vary from file to file, but tabs are not allowed. In like manner the `x`, `y` and `th` keys also require the same amount of spaces in front of each (at least as many spaces as each `point` key has). Add comments to the YAML file by using the # sign.   
+In order to include multiple markers into one YAML file they have to be separated by three dashes (“ --- ”). This is due to the fact that only one 'marker' object per YAML document is parsed. A set of dashes can be used repeatedly to include multiple YAML documents into one YAML file.  
+
+All `point` elements begin with a dash (-) and must be prefixed with the same amount of spaces, in the example above two spaces are used, the number of spaces can vary from file to file, but tabs are not allowed. In like manner the `x`, `y` and `th` keys also require the same amount of spaces in front of each (at least as many spaces as each `point` key has). Add comments to the YAML file by using the # sign.   
   
 Edit the YAML file to add/delete markers, change the sequence or add/remove comments. It is important to do not break the formatting rules described above or the markers will not load properly.  
 
@@ -77,7 +80,7 @@ The `parseMarkersFromFile()` in the 'MarkerParser' class reads in the markers fr
 
 ---
 
-## Usage example in combination with a waypoint generator node using Gazebo as simulation:
+## Example in combination with a waypoint generator node in Gazebo:  
 
 + Clone following repositories to a catkin workspace (for example ~/catkin_ws/src):
 

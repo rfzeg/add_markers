@@ -22,16 +22,15 @@
 // pose message
 #include <geometry_msgs/Pose.h>
 
+// marker visualization message
+#include <visualization_msgs/Marker.h>
+
 class MarkerParser {
   public:
     MarkerParser(){};
-    bool parseMarkersFromFile(std::vector<geometry_msgs::Pose> &parsed_marker_poses);
+    bool parseMarkersFromFile(std::vector<visualization_msgs::Marker> &parsed_markers);
     
   private:
-    // loadDataFromYaml(const std::string& filename);
-
-    // Parse Rviz markers from yaml file
-    // void parseMarkersFromFile(const std::string& filename, YAML::Node& node);  
 };
 
 // The >> operator disappeared in yaml-cpp 0.5, so this function is

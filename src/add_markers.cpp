@@ -64,8 +64,10 @@ int main( int argc, char** argv )
   ros::Subscriber sub = n.subscribe("/odom", 1000, odomListener);
   // init RvizMarkersPub object
   RvizMarkersPub rvizMarkersPub(&n);
-  // declare an array of Pose messages to store the parsed data from the selected YAML file
-  std::vector<geometry_msgs::Pose> parsed_marker_poses;
+  // declare a vector of Marker messages to store the parsed data from the selected YAML file
+  std::vector<visualization_msgs::Marker> parsed_markers;
+
+
   // declare waypoint element that holds one specific pose
   geometry_msgs::Pose waypoint_element;
   // integer that keeps track of the shape, initial shape type is set to be 'CUBE'
@@ -77,12 +79,16 @@ int main( int argc, char** argv )
   // init parser object
   MarkerParser markerParser;
 
-  bool built = markerParser.parseMarkersFromFile(parsed_marker_poses);
-  
-  if ( !built )
+  bool built = markerParser.parseMarkersFromFile(parsed_markers);
+
+  if (!built)
   {
-    ROS_FATAL( "Building markers from a file failed" );
+    ROS_FATAL("Building markers from a file failed");
     return 0;
+  }
+  else
+  {
+    ROS_INFO("YAML file has been successfully parsed");
   }
 
   // make best effort at maintaining a particular rate for a loop
@@ -93,15 +99,16 @@ int main( int argc, char** argv )
     {
     case 0:
       ROS_INFO_ONCE("At start location");
-      // funtion call to build a Rviz marker message and publish it
-      rvizMarkersPub.newVisMsg(parsed_marker_poses, 0, "ADD", 0);
+      // build a Rviz marker message and publish it
+      rvizMarkersPub.newVisMsg(parsed_markers[0], "ADD");
       task = 1;
       break;
     
     case 1:
       ROS_INFO_ONCE("Moving to pick up place");
-      // check if the pick up place is reached
-      waypoint_element = parsed_marker_poses[0];
+      waypoint_element.position.x = parsed_markers[0].pose.position.x;
+      waypoint_element.position.y = parsed_markers[0].pose.position.y;
+      // check if the pick up place (waypoint element) is reached
       if (isWaypointReached(global_pose, waypoint_element))
       {
         task = 2;
@@ -113,8 +120,8 @@ int main( int argc, char** argv )
       // Wait 5 seconds to simulate a pickup
       // construct a ros::Duration object, then call its sleep() method
       ros::Duration(5, 0).sleep();
-      // funtion call to build a Rviz marker message and publish it
-      rvizMarkersPub.newVisMsg(parsed_marker_poses, 0, "DELETE", 0);
+      // build a Rviz marker message and publish it
+      rvizMarkersPub.newVisMsg(parsed_markers[0], "DELETE");
       // move to next task
       task = 3;
       break;
@@ -122,7 +129,8 @@ int main( int argc, char** argv )
     case 3:
       ROS_INFO_ONCE("Moving to drop off zone");
       // check if the drop off zone is reached
-      waypoint_element = parsed_marker_poses[1];
+      waypoint_element.position.x = parsed_markers[1].pose.position.x;
+      waypoint_element.position.y = parsed_markers[1].pose.position.y;
       if (isWaypointReached(global_pose, waypoint_element))
       {
         // move to next task
@@ -132,13 +140,13 @@ int main( int argc, char** argv )
     
     case 4:
       ROS_INFO_ONCE("At drop off zone");
-      // funtion call to build a Rviz marker message and publish it
-      rvizMarkersPub.newVisMsg(parsed_marker_poses, 1, "ADD", 0);
+      // build a Rviz marker message and publish it
+      rvizMarkersPub.newVisMsg(parsed_markers[1], "ADD");
       break;
     }
-    // will call all the callbacks waiting to be called at that point in time
+    // call all the callbacks waiting to be called at this point in time
     ros::spinOnce();
-    // tracks time since last rate.sleep() and stops the right amount of time to match the rate()
+    // track time since last rate.sleep() and stop the right amount of time to match the rate()
     rate.sleep();
   }
   return 0;
