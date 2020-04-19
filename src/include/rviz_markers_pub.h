@@ -12,6 +12,9 @@
 // message types used
 // marker visualization message
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+
+
 // pose message
 #include <geometry_msgs/Pose.h>
 // stamped pose message
@@ -24,15 +27,12 @@ class RvizMarkersPub
 public:
     RvizMarkersPub(ros::NodeHandle* nodehandle);
 
-    void setMarkerType(uint32_t new_shape);
     // build and publish visualization marker
-    void newVisMsg(visualization_msgs::Marker parsed_marker, std::string action);
+    void newVisMsg(visualization_msgs::MarkerArray &parsed_marker, std::string action);
     void newVisLine(std::vector<geometry_msgs::Pose> &rviz_markers, int counter);
 
 private:
     ros::NodeHandle nh_;
-    // int to hold the marker type, ARROW=0, CUBE=1, SPHERE=2, CYLINDER=3, TEXT_VIEW_FACING=9, MESH_RESOURCE=10
-    uint32_t shape_ = 1;
 
     ros::Publisher marker_pub;
 

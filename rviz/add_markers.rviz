@@ -312,12 +312,12 @@ Visualization Manager:
       Topic: /odom
       Unreliable: false
       Value: false
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /visualization_marker
-      Name: Marker
+      Name: MarkerArray
       Namespaces:
-        basic_shapes: true
+        "": true
       Queue Size: 100
       Value: true
   Enabled: true

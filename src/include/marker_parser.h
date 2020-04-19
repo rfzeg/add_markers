@@ -22,13 +22,14 @@
 // pose message
 #include <geometry_msgs/Pose.h>
 
-// marker visualization message
+// Rviz marker visualization messages
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 class MarkerParser {
   public:
     MarkerParser(){};
-    bool parseMarkersFromFile(std::vector<visualization_msgs::Marker> &parsed_markers);
+    bool parseMarkersFromFile(visualization_msgs::MarkerArray &parsed_markers);
     
   private:
 };
@@ -40,5 +41,8 @@ void operator >> ( const YAML::Node& node, T& i )
 {
   i = node.as<T>();
 }
+
+// extraction operator, maps YAML Node data fields to Rviz Marker data fields
+void operator >> (const YAML::Node &node, visualization_msgs::Marker &marker);
 
 #endif

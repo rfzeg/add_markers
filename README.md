@@ -8,7 +8,7 @@ It also gets the current pose from the odometry topic, checks if robot's pose is
 uses that information to decide whether or not to to publish a marker to Rviz.
 
 ## Dependencies
-- yaml-cpp
+- yaml-cpp 05
 
 After installing ROS, the yaml-cpp library gets installed as a rosdep system dependency. Rosdep gets installed (when following the steps in the official ROS wiki page) by the instruction below:  
 `$ rosdep install --from-paths -i -y src`  
@@ -34,29 +34,30 @@ After installing ROS, the yaml-cpp library gets installed as a rosdep system dep
 The data structure to which a yaml file should adhere in order to be compatible with this node is the following:
 
 ```yml
-marker:
-  - point:
-      x: 1.0
-      y: 3.0
-      th: 0 # in degrees
----
-  - point:
-      x: 3.5
-      y: 2.5
-      th: 90 # in degrees
+# The document root contains a sequence (each entry denoted by leading dash '-')
+- name: "box1" # marker elements are stored as key/value pairs,
+  type: "cube" # whos values can be accesed using square bracket lookup marker_node["key"] 
+  frame_id: "map"
+  position: [3.5, 0.0, 2.5] # some marker elements contain sequences (lists) as values.
+  orientation: [0.0, 0.0, 0.0, 1.0] # list elements can be accesed by position index eg.: marker_node["position"][0]
+--- # three dashes allow to include several YAML documents into one YAML file
+- name: "sphere1" # all markers begin with a dash (-)
+  type: "sphere"
+  frame_id: "map"
+  position: [5.5, 7.0, 4.0]
+  orientation: [0.0, 0.0, 0.0, 1.0]
 ```
 
-As showed above the a marker's definition file has the following structure:  
+Each YAML document root node is a sequence (list) where each hyphen starts a new Rviz marker.  
 
-- `marker` (required): root object that identifies one YAML node containing data of one Rviz marker
-- `point` (required): block key that groups the definition of the marker's position and orientation in the map  
-- `x`, `y` and `th` (required): key-value pairs that contain the coordinates (x,y) and orientation (th), in degrees, of the marker
-
-In order to include multiple markers into one YAML file they have to be separated by three dashes (“ --- ”). This is due to the fact that only one 'marker' object per YAML document is parsed. A set of dashes can be used repeatedly to include multiple YAML documents into one YAML file.  
-
-All `point` elements begin with a dash (-) and must be prefixed with the same amount of spaces, in the example above two spaces are used, the number of spaces can vary from file to file, but tabs are not allowed. In like manner the `x`, `y` and `th` keys also require the same amount of spaces in front of each (at least as many spaces as each `point` key has). Add comments to the YAML file by using the # sign.   
+Each marker's data field is stored as key-value pair(*). Values can be strings (such as name, type, frame_id) or a nested sequence (such as in 'position' and 'orientation') formatted using the inline style (list members are enclosed in square brackets and separated by commas).   
+_(*) More precisely as a compact nested map because the first nested key-value pair starts in-line with the leading hyphen (-) for a more compact notation._
   
-Edit the YAML file to add/delete markers, change the sequence or add/remove comments. It is important to do not break the formatting rules described above or the markers will not load properly.  
+All markers (each starting with a dash '-') inside a YAML file are parsed into one MarkerArray message. Even if those markers are located in different YAML documents inside the file (the separation of documents in YAML is denoted by three dashes (---) on their own line).
+
+Important: All marker keys must be prefixed with the same amount of spaces, in the example above two spaces are used, the number of spaces can vary from file to file, but tabs are not allowed. To add comments to the YAML file use the # sign.   
+  
+Edit the YAML file manually to add/delete markers, change the sequence or add/remove comments. It is important to do not break the formatting rules described above or the markers will not load properly.  
 
 ## Direct usage:
 
@@ -109,6 +110,14 @@ The `parseMarkersFromFile()` in the 'MarkerParser' class reads in the markers fr
   
   Or run each node one by one manually in separated terminal instances.
 
+## Known Issues
+- Node crahes with error message: terminate called after throwing an instance of 'YAML::ParserException'
+  what():  yaml-cpp: error at line 2, column 2: end of sequence not found
+
+  Reason: Probably you have used tabs instead of spaces.
+  Solution: convert all tabs to spaces (leading and non-leading).
 
 ## Resources:
 - [Markers: Sending Basic Shapes (C++)](http://wiki.ros.org/rviz/Tutorials/Markers%3A%20Basic%20Shapes)
+- [YAML Ain’t Markup Language (YAML™) Version 1.2](https://yaml.org/spec/1.2/spec.html)
+- [yaml-cpp Tutorial](https://github.com/jbeder/yaml-cpp/wiki/Tutorial)
