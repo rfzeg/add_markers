@@ -39,6 +39,21 @@ void operator >> (const YAML::Node &node, visualization_msgs::Marker &marker)
   marker.pose.orientation.w = quat[3].as<float>();
 }
 
+// converts color from hex string to RGBA floats
+void MarkerParser::hex2ColorRGBAmsg(int index, std_msgs::ColorRGBA &color)
+{
+  // convert hex string (const char[7]) to integer
+  unsigned int hexValue;
+  std::stringstream ss;
+  ss << std::hex << color_vector_1[index % color_vector_1.size()];
+  ss >> hexValue;
+  // Convert from HEX color (const char[7]) to RGB floats
+  color.r = ((hexValue >> 16) & 0xFF) / 255.0;
+  color.g = ((hexValue >> 8) & 0xFF) / 255.0;
+  color.b = ((hexValue) & 0xFF) / 255.0;
+  color.a = 1.0;
+}
+
 // Parse Rviz markers from yaml file, feed with a vector of Pose messages to hold the result
 bool MarkerParser::parseMarkersFromFile(visualization_msgs::MarkerArray &parsed_markers)
 {
@@ -67,7 +82,6 @@ bool MarkerParser::parseMarkersFromFile(visualization_msgs::MarkerArray &parsed_
   }
 
   int total_counter = 0;
-
   // iterate through all documents in the file
   for (const auto &yaml_doc : yaml_docs)
   {
@@ -87,10 +101,10 @@ bool MarkerParser::parseMarkersFromFile(visualization_msgs::MarkerArray &parsed_
       // id field needs to be distinct from existing markers in order to enable multiple markers to exist at the same time
       current_marker.id = total_counter;
 
-      current_marker.color.a = 0.9;
-      current_marker.color.r = 0.5;
-      current_marker.color.g = 0.5;
-      current_marker.color.b = 0.5;
+      // color each marker with a distinctly different colors
+      std_msgs::ColorRGBA c;
+      hex2ColorRGBAmsg(total_counter, c);
+      current_marker.color = c;
 
       current_marker.scale.x = 0.5;
       current_marker.scale.y = 0.5;

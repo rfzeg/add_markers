@@ -1,0 +1,486 @@
+- name: "box1" 
+  type: "cube"
+  frame_id: "map" 
+  position: [-4.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box2" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box3" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box4" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box5" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box6" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box7" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box8" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box9" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-4.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box10" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box11" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box12" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box13" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box14" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box15" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box16" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box17" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box18" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-3.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box19" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box20" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box21" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box22" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box23" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box24" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box25" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box26" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box27" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-2.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box28" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box29" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box30" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box31" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box32" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box33" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box34" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box35" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box36" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [-1.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box37" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box38" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box39" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box40" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box41" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box42" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box43" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box44" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box45" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [0.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box46" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box47" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box48" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box49" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box50" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box51" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box52" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box53" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box54" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [1.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box55" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box56" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box57" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box58" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box59" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box60" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box61" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box62" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box63" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [2.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box64" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box65" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box66" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box67" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box68" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box69" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box70" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box71" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box72" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [3.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box73" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,-4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box74" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,-3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box75" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,-2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box76" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,-1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box77" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,0.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box78" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,1.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box79" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,2.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box80" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,3.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
+- name: "box81" 
+  type: "cube" 
+  frame_id: "map" 
+  position: [4.0,4.0,0.0] 
+  orientation: [0.0, 0.0, 0.0, 1.0]  
+
