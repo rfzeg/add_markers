@@ -5,6 +5,8 @@
 void operator >> (const YAML::Node &node, visualization_msgs::Marker &marker)
 {
   std::string type = node["type"].as<std::string>();
+  // types enumerated in visualization_msgs/Marker message:
+  // http://docs.ros.org/melodic/api/visualization_msgs/html/msg/Marker.html
   if (type == "cube")
   {
     marker.type = visualization_msgs::Marker::CUBE;
@@ -17,11 +19,24 @@ void operator >> (const YAML::Node &node, visualization_msgs::Marker &marker)
   {
     marker.type = visualization_msgs::Marker::CYLINDER;
   }
+  else if (type == "line_strip")
+  {
+    marker.type = visualization_msgs::Marker::LINE_STRIP;
+  }
+  else if (type == "sphere_list")
+  {
+    marker.type = visualization_msgs::Marker::SPHERE_LIST;
+  }
+  else if (type == "points")
+  {
+    marker.type = visualization_msgs::Marker::POINTS;
+  }
   else
-    {
-      ROS_WARN("Wrong value for 'type' field in YAML file, using default 'cube' (only 'cube', 'sphere' and 'cylinder' supported)");
-      marker.type = visualization_msgs::Marker::CUBE;
-    }
+  {
+    ROS_WARN("Wrong value for 'type' field in YAML file, using default 'cube'");
+    ROS_INFO("Only \"cube\", \"sphere\", \"cylinder\", \"line_strip\" \"sphere_list\" and \"points\"  (case sensitive) are supported");
+    marker.type = visualization_msgs::Marker::CUBE;
+  }
 
   marker.header.frame_id = node["frame_id"].as<std::string>();
 
@@ -37,6 +52,27 @@ void operator >> (const YAML::Node &node, visualization_msgs::Marker &marker)
   marker.pose.orientation.y = quat[1].as<float>();
   marker.pose.orientation.z = quat[2].as<float>();
   marker.pose.orientation.w = quat[3].as<float>();
+
+  if (YAML::Node points = node["points"])
+  {
+    ROS_DEBUG("Processing XY Points");
+    // iterate through all point elements
+    int index = 0;
+    for (YAML::const_iterator it = points.begin(); it != points.end(); ++it)
+    {
+      // process points
+      // get reference to the "it" points and create new YAML::Node reference out of it
+      const YAML::Node &point = *it;
+      // declare 'p' which is used to keep each coordinate pair
+      geometry_msgs::Point p;
+      p.x = point["point"]["x"].as<float>();
+      p.y = point["point"]["y"].as<float>();
+      ROS_DEBUG("Point %d (x,y): %f,%f", index, p.x, p.y);
+      marker.points.push_back(p);
+      // use same color as defined for the main geometry (type)
+      marker.colors.push_back(marker.color);
+    }
+  }
 }
 
 // converts color from hex string to RGBA floats
@@ -82,29 +118,30 @@ bool MarkerParser::parseMarkersFromFile(visualization_msgs::MarkerArray &parsed_
   }
 
   int total_counter = 0;
-  // iterate through all documents in the file
+  // sequence iterator to iterate through all documents in the file
   for (const auto &yaml_doc : yaml_docs)
   {
     ROS_DEBUG("New YAML document in YAML file!");
 
-    // iterate through all rviz markers in document
+    // map iterator to iterate through all rviz markers in document
     for (YAML::const_iterator it = yaml_doc.begin(); it != yaml_doc.end(); ++it)
     {
       // get reference to the "it" yaml_doc and create new YAML::Node reference out of it
       const YAML::Node &node = *it;
       // declare variable used to keep each marker
       visualization_msgs::Marker current_marker;
+
+      // color each marker with a distinctly different colors
+      std_msgs::ColorRGBA c;
+      hex2ColorRGBAmsg(total_counter, c);
+      current_marker.color = c;
+
       // map all YAML Node data fields to Rviz Marker data fields using a custom extraction operator
       node >> current_marker;
 
       current_marker.header.stamp = ros::Time::now();
       // id field needs to be distinct from existing markers in order to enable multiple markers to exist at the same time
       current_marker.id = total_counter;
-
-      // color each marker with a distinctly different colors
-      std_msgs::ColorRGBA c;
-      hex2ColorRGBAmsg(total_counter, c);
-      current_marker.color = c;
 
       current_marker.scale.x = 0.5;
       current_marker.scale.y = 0.5;

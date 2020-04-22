@@ -29,7 +29,6 @@ public:
 
     // build and publish visualization marker
     void newVisMsg(visualization_msgs::MarkerArray &parsed_marker, std::string action);
-    void newVisLine(std::vector<geometry_msgs::Pose> &rviz_markers, int counter);
 
 private:
     ros::NodeHandle nh_;

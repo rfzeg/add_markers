@@ -46,28 +46,3 @@ for(int i = 0; i < (int)parsed_marker.markers.size(); ++i)
 
   marker_pub.publish(parsed_marker);
 }
-
-/* Builds visualization message containing one line and publishes it */
-void RvizMarkersPub::newVisLine(std::vector<geometry_msgs::Pose> &rviz_markers, int counter)
-{
-  visualization_msgs::Marker m;
-  m.header.frame_id = "/map";
-  m.header.stamp = ros::Time::now();
-  m.id = counter;
-  m.action = visualization_msgs::Marker::ADD;
-  m.scale.x = 0.1;
-  m.type = visualization_msgs::Marker::LINE_STRIP; // set marker type
-  m.color.r = 1; m.color.g = 0; m.color.b = 0; m.color.a = 1;
-  // specify how long this marker should stick around before being automatically deleted.
-  m.lifetime = ros::Duration();
-
-  for (auto it : rviz_markers) {
-    geometry_msgs::Point ps;
-    ps.x = it.position.x;
-    ps.y = it.position.y;
-    ps.z = it.position.z;
-    m.points.push_back(ps);
-  }
-
-  marker_pub.publish(m);
-}
