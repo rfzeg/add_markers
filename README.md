@@ -5,18 +5,10 @@ Author: R. Zegers
 ## Description
 ROS node that reads in Rviz marker positions from a YAML file and publishes them to Rviz as required.  
 It also gets the current pose from the odometry topic, checks if robot's pose is equal to the position of one of the markers and
-uses that information to decide whether or not to to publish a marker to Rviz.
+uses that information to decide whether or not to publish a marker to Rviz.
 
 ## Dependencies
-- yaml-cpp 05
-
-After installing ROS, the yaml-cpp library gets installed as a rosdep system dependency. Rosdep gets installed (when following the steps in the official ROS wiki page) by the instruction below:  
-`$ rosdep install --from-paths -i -y src`  
-> To use yaml-cpp with a new ROS package make sure the CMakeLists.txt file contains the following instruction so the compiler can link
-> against the yaml-cpp library:  
-> `target_link_libraries(${PROJECT_NAME} yaml-cpp)`  
-> Also the package.xml manifest has to be edited to add the following:  
-> `<build_depend>common_rosdeps</build_depend>`  
+- yaml-cpp 05 (installed by default with official ROS installation steps)  
 
 ## Repository architecture 
 ### Source code files :
@@ -31,8 +23,8 @@ After installing ROS, the yaml-cpp library gets installed as a rosdep system dep
 
 ## YAML file structure
 
-This node imports Rviz Marker data from YAML files which can store them in a persitent manner and human-readable format. YAML files can be editted manually to add/delete markers, change their properties or add/remove comments (denoted by the # sign). When doing so, it is important to take enough care to not break the formatting rules described below or the markers will not load properly. 
-The data structure to which a yaml file must adhere in order to be compatible with this node is the following:
+This node imports Rviz Marker data from YAML files which can store them in a persitent manner and human-readable format. YAML files can be edited with a text editor manually to add or delete markers, change their values or add comments (denoted by the # sign). When doing so, it is important to take enough care to **keep the formatting rules** described below or the markers will not load properly. 
+Yaml files read by this node must adhere to the following structure:  
 
 ```yml
 # The document root contains a sequence (each entry denoted by leading dash '-')
@@ -92,7 +84,7 @@ All markers contained in one YAML file are parsed into one [MarkerArray message]
 To view the markers, run rviz:  
 `$ rosrun rviz rviz`  
 
-If required, set the Fixed Frame field to "/map" or the frame the marker was set under `marker_message_.header.frame_id`.  
+If required, set the Fixed Frame field to "/map" or the frame indicated under the markers data field key "frame_id".  
 Then add a Markers display. Verify that the topic specified is the same as the one being published.
 
 ## Class Interfaces 
