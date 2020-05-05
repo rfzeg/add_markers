@@ -13,28 +13,12 @@
 // stamped pose message
 #include <geometry_msgs/PoseStamped.h>
 
-// imports the Odometry message type from nav_msgs required to subscribe to Odometry incoming messages
-#include <nav_msgs/Odometry.h>
 // incorporate file that defines the class "RvizMarkersPub"
 #include "include/rviz_markers_pub.h"
 // incorporate file that defines the class "MarkerParser"
 #include "include/marker_parser.h"
-
-// initialize global variable for current global pose
-geometry_msgs::PoseStamped global_pose;
-
-/* Get current pose from odometry topic */
-void odomListener(const nav_msgs::Odometry::ConstPtr& msg)
-{
-    // Populate current global pose header
-    global_pose.header.stamp = ros::Time::now();
-    // Populate current global pose position data
-    global_pose.pose.position.x = msg->pose.pose.position.x;
-    global_pose.pose.position.y = msg->pose.pose.position.y; 
-    global_pose.pose.position.z = msg->pose.pose.position.z;
-    // Populate current global pose orientation data
-    global_pose.pose.orientation = msg->pose.pose.orientation;
-}
+// incorporate file that defines the class "OdomSubscriber"
+#include "include/odom_subscriber.h"
 
 /* Calculate euclidean distance between two points */
 double pose2XYdistance(const geometry_msgs::PoseStamped& global_pose, double goal_x, double goal_y) {
@@ -61,7 +45,13 @@ int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers"); // create ROS node
   ros::NodeHandle n; // start node
-  ros::Subscriber sub = n.subscribe("/odom", 1000, odomListener);
+
+  // initialize odometry subscriber (topic: /odom)
+  OdomSubscriber odomSub{&n};
+
+  // declare global variable for current global pose
+  geometry_msgs::PoseStamped global_pose;
+
   // init RvizMarkersPub object
   RvizMarkersPub rvizMarkersPub(&n);
 
@@ -93,6 +83,14 @@ int main( int argc, char** argv )
   ros::Rate rate(0.5);// in Hz
   while(ros::ok())
   {
+  // get newest data for all subscribers
+  ros::spinOnce();
+  // update global pose header
+  global_pose.header.stamp = ros::Time::now();
+  // update odometry
+  global_pose.pose.position.x = odomSub.getOdomCoords().first;
+  global_pose.pose.position.y = odomSub.getOdomCoords().second;
+
   switch (task)
     {
     case 0:
@@ -142,8 +140,6 @@ int main( int argc, char** argv )
       rvizMarkersPub.newVisMsg(parsed_markers, "ADD");
       break;
     }
-    // call all the callbacks waiting to be called at this point in time
-    ros::spinOnce();
     // track time since last rate.sleep() and stop the right amount of time to match the rate()
     rate.sleep();
   }

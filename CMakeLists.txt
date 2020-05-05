@@ -206,6 +206,6 @@ include_directories(
 # catkin_add_nosetests(test)
 
 # add the executable
-add_executable(add_markers src/add_markers.cpp src/rviz_markers_pub.cpp src/marker_parser.cpp)
+add_executable(add_markers src/add_markers.cpp src/rviz_markers_pub.cpp src/marker_parser.cpp src/odom_subscriber.cpp)
 # link the executable to libraries
 target_link_libraries(add_markers ${catkin_LIBRARIES} yaml-cpp)
