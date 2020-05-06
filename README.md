@@ -73,7 +73,7 @@ Each marker entry has keys beneath it. Some marker keys contain nested sequences
   ```
 All markers contained in one YAML file are parsed into one [MarkerArray message](http://docs.ros.org/melodic/api/visualization_msgs/html/msg/MarkerArray.html), regardless of whether those markers are located in different YAML documents or not (documents inside YAML files are separated using three dashes --- on their own line).  
 
-## Direct usage:
+## Direct usage
 
 - Clone this repository into a ROS catkin workspace
 - Build and source the workspace
@@ -134,7 +134,10 @@ The `newVisMsg()` method take in as argument a visualization_msgs::MarkerArray o
   **Reason**: Probably the message type specified when creating the publisher (`marker_pub = nh_.advertise<_msg\_type_>`) is different from the message type passed in to it (e.g. in `rvizMarkersPub.newVisMsg(parsed_markers, "ADD");`).  
   **Solution**: make sure visualization_msgs/Marker or visualization_msgs/MarkerArray are used in a consistent manner.  
 
-## Resources:
+## Further improvements
+- Makes data available and communicate with other nodes using ROS APIs
+
+## Resources
 - [Markers: Sending Basic Shapes (C++)](http://wiki.ros.org/rviz/Tutorials/Markers%3A%20Basic%20Shapes)
 - [YAML Ain’t Markup Language (YAML™) Version 1.2](https://yaml.org/spec/1.2/spec.html)
 - [yaml-cpp Tutorial](https://github.com/jbeder/yaml-cpp/wiki/Tutorial)
